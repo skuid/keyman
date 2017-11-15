@@ -1,0 +1,24 @@
+syntax = "proto3";
+
+package shapes;
+
+
+service Signer {
+
+  rpc Sign(SignRequest) returns (KeyResponse) {}
+
+  rpc PublicKey(KeyRequest) returns (KeyResponse) {}
+}
+
+
+message SignRequest {
+  bytes Key = 1;
+  repeated string Principals = 2;
+}
+
+message KeyRequest {
+}
+
+message KeyResponse {
+  bytes Certificate = 1;
+}

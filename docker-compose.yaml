@@ -1,0 +1,19 @@
+version: "3"
+services:
+  ssh:
+    build:
+      context: ./demo
+    ports:
+    - '2222:2222'
+  keyman:
+    build:
+      context: ./
+    ports:
+    - '3000:3000'
+    - '3001:3001'
+    volumes:
+    - './demo/:/demo/'
+    environment:
+      KEYMAN_CERT_FILE: "/demo/server.pem"
+      KEYMAN_KEY_FILE: "/demo/server.key"
+      KEYMAN_KEY: "/demo/ca"

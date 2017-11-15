@@ -11,6 +11,11 @@ _test
 coverage.out
 
 keyman
+keyman-cli
+client/client
+request.json
+server.key
+server.pem
 
 # Architecture specific extensions/prefixes
 *.[568vq]
