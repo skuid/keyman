@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/skuid/keyman.svg?branch=master)](https://travis-ci.org/skuid/keyman)
+
 # keyman
 
 An SSH key CA Server
