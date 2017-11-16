@@ -1,0 +1,14 @@
+sudo: false
+language: go
+
+go:
+- 1.9
+- tip
+
+before_install:
+- go get golang.org/x/tools/cmd/cover
+
+script:
+- go test -v ./...
+- go build
+- go build -o keyman-cli ./client
