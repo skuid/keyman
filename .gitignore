@@ -14,8 +14,8 @@ keyman
 keyman-cli
 client/client
 request.json
-server.key
-server.pem
+demo/server.key
+demo/server.pem
 
 # Architecture specific extensions/prefixes
 *.[568vq]
