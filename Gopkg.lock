@@ -8,10 +8,28 @@
   revision = "4c0e84591b9aa9e6dcfdf3e020114cd81f89d5f9"
 
 [[projects]]
+  branch = "v2"
+  name = "github.com/coreos/go-oidc"
+  packages = ["."]
+  revision = "77e7f2010a464ade7338597afe650dfcffbe2ca8"
+
+[[projects]]
+  name = "github.com/dgrijalva/jwt-go"
+  packages = ["."]
+  revision = "dbeaa9332f19a944acb5736b4456cfcc02140e29"
+  version = "v3.1.0"
+
+[[projects]]
   name = "github.com/fsnotify/fsnotify"
   packages = ["."]
   revision = "629574ca2a5df945712d3079857300b5e4da0236"
   version = "v1.4.2"
+
+[[projects]]
+  name = "github.com/ghodss/yaml"
+  packages = ["."]
+  revision = "0ca9ea5df5451ffdf184b4428c902747c2c11cd7"
+  version = "v1.0.0"
 
 [[projects]]
   branch = "master"
@@ -22,8 +40,14 @@
 [[projects]]
   branch = "master"
   name = "github.com/grpc-ecosystem/go-grpc-middleware"
-  packages = [".","logging","logging/zap","tags"]
+  packages = [".","auth","logging","logging/zap","recovery","tags","util/metautils"]
   revision = "fa8fef87dcecac0bda02d36abb3c790ab9e0030b"
+
+[[projects]]
+  name = "github.com/grpc-ecosystem/go-grpc-prometheus"
+  packages = ["."]
+  revision = "6b7015e65d366bf3f19b2b2a000a831940f0f7e0"
+  version = "v1.1"
 
 [[projects]]
   branch = "master"
@@ -60,6 +84,12 @@
   packages = ["."]
   revision = "16398bac157da96aa88f98a2df640c7f32af1da2"
   version = "v1.0.1"
+
+[[projects]]
+  branch = "master"
+  name = "github.com/pquerna/cachecontrol"
+  packages = [".","cacheobject"]
+  revision = "0dec1b30a0215bb68605dfc568e8855066c9202d"
 
 [[projects]]
   name = "github.com/prometheus/client_golang"
@@ -148,8 +178,14 @@
 [[projects]]
   branch = "master"
   name = "golang.org/x/net"
-  packages = ["context","http2","http2/hpack","idna","internal/timeseries","lex/httplex","trace"]
+  packages = ["context","context/ctxhttp","http2","http2/hpack","idna","internal/timeseries","lex/httplex","trace"]
   revision = "9dfe39835686865bff950a07b394c12a98ddc811"
+
+[[projects]]
+  branch = "master"
+  name = "golang.org/x/oauth2"
+  packages = [".","internal"]
+  revision = "f95fa95eaa936d9d87489b15d1d18b97c1ba9c28"
 
 [[projects]]
   branch = "master"
@@ -164,6 +200,12 @@
   revision = "88f656faf3f37f690df1a32515b479415e1a6769"
 
 [[projects]]
+  name = "google.golang.org/appengine"
+  packages = ["internal","internal/base","internal/datastore","internal/log","internal/remote_api","internal/urlfetch","urlfetch"]
+  revision = "150dc57a1b433e64154302bdc40b6bb8aefa313a"
+  version = "v1.0.0"
+
+[[projects]]
   branch = "master"
   name = "google.golang.org/genproto"
   packages = ["googleapis/rpc/status"]
@@ -176,6 +218,12 @@
   version = "v1.7.3"
 
 [[projects]]
+  name = "gopkg.in/square/go-jose.v2"
+  packages = [".","cipher","json"]
+  revision = "f8f38de21b4dcd69d0413faf231983f5fd6634b1"
+  version = "v2.1.3"
+
+[[projects]]
   branch = "v2"
   name = "gopkg.in/yaml.v2"
   packages = ["."]
@@ -184,6 +232,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "1353ceabf6724bd7b84a56d6f0d22de8bcb9aca718dae8557c2fd2fed44046bb"
+  inputs-digest = "54dc6e62f61021fd1be896032d3ed8a0a98e38e936ca4c5608fca26b35b91f9e"
   solver-name = "gps-cdcl"
   solver-version = 1
