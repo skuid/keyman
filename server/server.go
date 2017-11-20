@@ -10,31 +10,39 @@ import (
 	"github.com/skuid/keyman/sign"
 	"go.uber.org/zap"
 	"golang.org/x/crypto/ssh"
+	"google.golang.org/grpc/metadata"
 )
 
-type KeyRequest struct {
-	Key        string   `json:"key"`
-	Principals []string `json:"principals"`
-}
-
-type KeyResponse struct {
-	Certificate string `json:"certificate"`
-}
-
 type Server struct {
-	CA        sign.Signer
+	// The Signer that signs requests
+	CA sign.Signer
+	// The CA comment to emit on the PublicKey
 	CaComment string
 
+	// The duration to sign keys for
 	Duration time.Duration
 
-	// TODO change to per-request identity
-	Identity string
+	IdentityHeader string
 }
 
+// Sign handler for incoming certificate requests
 func (s *Server) Sign(ctx context.Context, r *shapes.SignRequest) (*shapes.KeyResponse, error) {
+	md, ok := metadata.FromIncomingContext(ctx)
+
+	if !ok {
+		return nil, fmt.Errorf("Could not get metadata from incoming request")
+	}
+	identity, ok := md[s.IdentityHeader]
+	if !ok {
+		return nil, fmt.Errorf("Could not get identity from incoming request")
+	}
+	if len(identity) != 1 {
+		return nil, fmt.Errorf("Got more or less than one identity from incoming request")
+	}
+
 	signedCert, err := s.CA.Sign(
 		r.Key,
-		s.Identity,
+		identity[0],
 		r.Principals,
 		s.Duration,
 	)
@@ -45,6 +53,7 @@ func (s *Server) Sign(ctx context.Context, r *shapes.SignRequest) (*shapes.KeyRe
 	return &shapes.KeyResponse{Certificate: signedCert}, nil
 }
 
+// PublicKey returns the server's public key
 func (s *Server) PublicKey(ctx context.Context, r *shapes.KeyRequest) (*shapes.KeyResponse, error) {
 	pubKey, err := ssh.NewPublicKey(s.CA.Cert())
 	if err != nil {
