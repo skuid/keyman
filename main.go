@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/prometheus/client_golang/prometheus/promhttp"
+	"github.com/skuid/keyman/oidcauth"
 	"github.com/skuid/keyman/server"
 	pb "github.com/skuid/keyman/shapes"
 	"github.com/skuid/keyman/sign"
@@ -33,6 +34,7 @@ func main() {
 	flag.Duration("validity", time.Duration(8)*time.Hour, "The amount of time certs are signed for")
 	flag.String("ca-name", "ca", "The CA name")
 	flag.Bool("tls", true, "Use TLS")
+	flag.String("client-id", "", "The ClientID for the OIDC application")
 
 	flag.Parse()
 
@@ -55,10 +57,10 @@ func main() {
 	}
 
 	caServer := &server.Server{
-		CA:        ca,
-		CaComment: viper.GetString("ca-name"),
-		Duration:  viper.GetDuration("validity"),
-		Identity:  "user",
+		CA:             ca,
+		CaComment:      viper.GetString("ca-name"),
+		Duration:       viper.GetDuration("validity"),
+		IdentityHeader: oidcauth.Identity,
 	}
 
 	hostPort := fmt.Sprintf(":%d", viper.GetInt("port"))
@@ -77,7 +79,7 @@ func main() {
 		opts = []grpc.ServerOption{grpc.Creds(creds)}
 	}
 	//grpcServer := grpc.NewServer(opts...)
-	grpcServer := LoggingServer(l, opts...)
+	grpcServer := NewServer(viper.GetString("client_id"), opts...)
 
 	pb.RegisterSignerServer(grpcServer, caServer)
 

@@ -1,9 +1,12 @@
 [![Build Status](https://travis-ci.org/skuid/keyman.svg?branch=master)](https://travis-ci.org/skuid/keyman)
 [![https://img.shields.io/badge/godoc-reference-5272B4.svg?style=flat-square](https://img.shields.io/badge/godoc-reference-5272B4.svg?style=flat-square)](http://godoc.org/github.com/skuid/keyman/)
+[![Docker Repository on Quay](https://quay.io/repository/skuid/keyman/status "Docker Repository on Quay")](https://quay.io/repository/skuid/keyman)
 
 # keyman
 
 An SSH key CA Server
+
+[![keyman](/keyman.jpg)]()
 
 # Usage
 
@@ -37,7 +40,7 @@ ssh-keygen -Lf ~/.ssh/id_rsa-cert.pub
 ssh -p 2222 core@localhost
 
 # When inside the container
-cat /var/log/ssh.log
+cat /var/log/sshd.log
 ```
 
 # Production Setup
