@@ -4,7 +4,9 @@ ENV PKG=/go/src/github.com/skuid/keyman
 ADD . $PKG
 WORKDIR $PKG
 
-RUN go install -ldflags '-w'
+ARG COMMIT_SHA
+
+RUN go install -ldflags "-w -X github.com/skuid/keyman/vendor/github.com/skuid/spec/metrics.commit=${COMMIT_SHA}"
 
 FROM alpine:3.6
 
