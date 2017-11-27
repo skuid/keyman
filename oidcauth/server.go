@@ -10,9 +10,11 @@ import (
 	"google.golang.org/grpc/metadata"
 )
 
+// Identity is a constant for grpc metadata
 const Identity = "identity"
 
-func ValidateIdToken(clientID, claim, issuerURL string) grpc_auth.AuthFunc {
+// ValidateIDToken returns a grpc_auth.AuthFunc for verifying OIDC requests
+func ValidateIDToken(clientID, issuerURL string) grpc_auth.AuthFunc {
 	return func(ctx context.Context) (context.Context, error) {
 		provider, err := oidc.NewProvider(ctx, issuerURL)
 		if err != nil {

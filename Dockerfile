@@ -13,3 +13,4 @@ RUN apk add -U ca-certificates
 COPY --from=builder /go/bin/keyman /bin/keyman
 
 ENTRYPOINT ["/bin/keyman"]
+CMD ["server"]

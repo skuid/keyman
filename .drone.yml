@@ -1,0 +1,42 @@
+workspace:
+  base: /go
+  path: src/github.com/skuid/keyman
+
+pipeline:
+  test:
+    image: golang:1.9-alpine
+    environment:
+      CGO_ENABLED: '0'
+    commands:
+      - go test ./... -v
+      - go vet ./...
+      - go test -v ./...
+      - go test -race -v ./...
+      - go build -i
+  build:
+    image: golang:1.9-alpine
+    environment:
+      CGO_ENABLED: '0'
+    commands:
+      - go build -x  -ldflags="-X github.com/skuid/keyman/vendor/github.com/skuid/spec/metrics.commit=${DRONE_COMMIT_SHA}"
+
+  build-image:
+    image: quay.io/skuid/docker-builder:17.06.0-ce
+    environment:
+      - DOCKER_HOST=tcp://build2.skuid.ink:2375
+    commands:
+      - docker build -t quay.io/skuid/keyman:${DRONE_BRANCH}-${DRONE_BUILD_NUMBER} .
+    when:
+      event: push
+
+  publish:
+    image: quay.io/skuid/docker-builder:17.06.0-ce
+    environment:
+      - DOCKER_HOST=tcp://build2.skuid.ink:2375
+    secrets: [docker_username, docker_password]
+    commands:
+      - docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD quay.io
+      - docker push quay.io/skuid/keyman:${DRONE_REPO_BRANCH}-${DRONE_BUILD_NUMBER}
+    when:
+      branch: master
+      event: push

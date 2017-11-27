@@ -11,17 +11,18 @@ import (
 	"github.com/spf13/viper"
 )
 
+// Setup ensures the user has a valid id token for OIDC requests
 func Setup() error {
 	var (
-		idToken      string = viper.GetString("id_token")
-		accessToken  string = viper.GetString("access_token")
-		refreshToken string = viper.GetString("refresh_token")
-		clientID     string = viper.GetString("client_id")
-		clientSecret string = viper.GetString("client_secret")
+		idToken      = viper.GetString("id_token")
+		accessToken  = viper.GetString("access_token")
+		refreshToken = viper.GetString("refresh_token")
+		clientID     = viper.GetString("client_id")
+		clientSecret = viper.GetString("client_secret")
 		err          error
 	)
 
-	manager, err := NewManager(clientID, clientSecret, context.Background())
+	manager, err := NewManager(context.Background(), clientID, clientSecret)
 	if err != nil {
 		return err
 	}

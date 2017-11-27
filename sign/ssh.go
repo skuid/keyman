@@ -51,11 +51,12 @@ type CaServer struct {
 	key  ssh.Signer
 }
 
+// Cert returns the CA's Certificate
 func (c *CaServer) Cert() ssh.PublicKey {
 	return c.cert
 }
 
-// Read in an RSA private key and return a new *CaServer
+// ReadPrivKey accepts an RSA private key and return a new *CaServer
 func ReadPrivKey(filename string) (*CaServer, error) {
 	certData, err := ioutil.ReadFile(filename)
 	if err != nil {

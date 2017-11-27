@@ -30,7 +30,7 @@ func getCert(kid string) (string, error) {
 func keyFunc(tok *jwt.Token) (interface{}, error) {
 	kid, ok := tok.Header["kid"]
 	if !ok {
-		return nil, fmt.Errorf("kid not found in header!")
+		return nil, fmt.Errorf("Key 'kid' not found in header")
 	}
 	keyID := kid.(string)
 	key, err := getCert(keyID)

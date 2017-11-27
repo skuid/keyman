@@ -9,11 +9,11 @@ import (
 	"github.com/skuid/keyman/shapes"
 	"github.com/skuid/keyman/sign"
 	"go.uber.org/zap"
-	"golang.org/x/crypto/ssh"
 	"google.golang.org/grpc/metadata"
 )
 
-type Server struct {
+// Authority is an SSH CA signing server
+type Authority struct {
 	// The Signer that signs requests
 	CA sign.Signer
 	// The CA comment to emit on the PublicKey
@@ -26,7 +26,7 @@ type Server struct {
 }
 
 // Sign handler for incoming certificate requests
-func (s *Server) Sign(ctx context.Context, r *shapes.SignRequest) (*shapes.KeyResponse, error) {
+func (s *Authority) Sign(ctx context.Context, r *shapes.SignRequest) (*shapes.KeyResponse, error) {
 	md, ok := metadata.FromIncomingContext(ctx)
 
 	if !ok {
@@ -54,14 +54,8 @@ func (s *Server) Sign(ctx context.Context, r *shapes.SignRequest) (*shapes.KeyRe
 }
 
 // PublicKey returns the server's public key
-func (s *Server) PublicKey(ctx context.Context, r *shapes.KeyRequest) (*shapes.KeyResponse, error) {
-	pubKey, err := ssh.NewPublicKey(s.CA.Cert())
-	if err != nil {
-		zap.L().Error("Error converting CA pubkey", zap.Error(err))
-		return nil, fmt.Errorf("Error converting CA pubkey")
-	}
-
-	data := base64.StdEncoding.EncodeToString(pubKey.Marshal())
-	content := []byte(fmt.Sprintf("%s %s %s", pubKey.Type(), data, s.CaComment))
+func (s *Authority) PublicKey(ctx context.Context, r *shapes.KeyRequest) (*shapes.KeyResponse, error) {
+	data := base64.StdEncoding.EncodeToString(s.CA.Cert().Marshal())
+	content := []byte(fmt.Sprintf("%s %s %s", s.CA.Cert().Type(), data, s.CaComment))
 	return &shapes.KeyResponse{Certificate: content}, nil
 }
