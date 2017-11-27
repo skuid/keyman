@@ -92,7 +92,8 @@ func serverFunc(cmd *cobra.Command, args []string) {
 	httpServer := &http.Server{Addr: hostPort, Handler: handler}
 	lifecycle.ShutdownOnTerm(httpServer)
 
-	if err := httpServer.ListenAndServeTLS(viper.GetString("cert_file"), viper.GetString("key_file")); err != http.ErrServerClosed {
+	zap.L().Info("Keyman server is starting", zap.String("listen", hostPort))
+	if err := httpServer.ListenAndServe(); err != http.ErrServerClosed {
 		zap.L().Fatal("Error listening", zap.Error(err))
 	}
 	zap.L().Info("Server gracefully stopped")
@@ -113,8 +114,6 @@ func init() {
 	localFlagSet.StringP("key", "k", "./ca", "The CA private key to load")
 	localFlagSet.IntP("port", "p", 3000, "The port to listen on")
 	localFlagSet.Int("metrics-port", 3001, "The metrics port to listen on")
-	localFlagSet.String("cert_file", "./server.pem", "The TLS cert file")
-	localFlagSet.String("key_file", "./server.key", "The TLS key file")
 	localFlagSet.Duration("validity", time.Duration(8)*time.Hour, "The amount of time certs are signed for")
 	localFlagSet.String("ca-name", "ca", "The CA name")
 	localFlagSet.Bool("tls", true, "Use TLS")
