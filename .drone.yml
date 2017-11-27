@@ -5,20 +5,20 @@ workspace:
 pipeline:
   test:
     image: golang:1.9-alpine
-    environment:
-      CGO_ENABLED: '0'
     commands:
-      - go test ./... -v
-      - go vet ./...
-      - go test -v ./...
-      - go test -race -v ./...
       - go build -i
+      - go test -v ./...
+      - go vet ./...
+  test_race:
+    image: golang:1.9
+    commands:
+      - go test -race ./...
   build:
     image: golang:1.9-alpine
     environment:
       CGO_ENABLED: '0'
     commands:
-      - go build -x  -ldflags="-X github.com/skuid/keyman/vendor/github.com/skuid/spec/metrics.commit=${DRONE_COMMIT_SHA}"
+      - go build -ldflags="-X github.com/skuid/keyman/vendor/github.com/skuid/spec/metrics.commit=${DRONE_COMMIT_SHA}"
 
   build-image:
     image: quay.io/skuid/docker-builder:17.06.0-ce
