@@ -11,17 +11,34 @@ An SSH key CA Server
 # Usage
 
 ```
-Usage of ./keyman:
-      --cert_file string   The TLS cert file (default "./server.pem")
-  -k, --key string         The CA private key to load (default "./ca")
-      --key_file string    The TLS key file (default "./server.key")
-  -l, --level Level        Log level (default info)
-      --metrics-port int   The metrics port to listen on (default 3001)
-  -p, --port int           The port to listen on (default 3000)
-      --tls                Use TLS (default true)
+keyman is a cli for requesting server-signed SSH certs
+
+Usage:
+  keyman [flags]
+  keyman [command]
+
+Available Commands:
+  help        Help about any command
+  server      Run a SSH key signing server
+
+Flags:
+      --client-id string         The client ID for the application
+      --client-secret string     The client secret for the application
+      --config string            config file (default is $HOME/.keyman.yaml)
+  -h, --help                     help for keyman
+      --open-browser             Open the oauth approval URL in the browser (default true)
+      --principals stringSlice   The identities to request (default [core,openvpnas])
+      --pubkey string            The key to sign
+      --server string            The server to connect to (default "localhost:3000")
+      --skip-verify              Skip server TLS verification
+
+Use "keyman [command] --help" for more information about a command.
 ```
 
 # Demo
+
+Create a ClientID/Client Secret in Google, and set the environment variables
+`KEYMAN_CLIENT_ID` and `KEYMAN_CLIENT_SECRET`.
 
 ```bash
 # Create a server key pair
@@ -30,12 +47,13 @@ openssl req -x509 -nodes -newkey rsa:4096 -keyout server.key -out server.pem -su
 cd -
 
 # Start the server and an SSH server
+echo "      KEYMAN_CLIENT_ID: \"${KEYMAN_CLIENT_ID}\"" >> docker-compose.yaml
 docker-compose up -d
 
 # Get your pubkey signed by the server
-go build -o keyman-cli ./client/
+go build
 MY_PUBKEY=$(ls ~/.ssh/id_rsa.pub)
-./keyman-cli --cert_file ./demo/server.pem --pubkey $MY_PUBKEY > ~/.ssh/id_rsa-cert.pub
+./keyman --pubkey $MY_PUBKEY > ~/.ssh/id_rsa-cert.pub
 ssh-keygen -Lf ~/.ssh/id_rsa-cert.pub
 ssh -p 2222 core@localhost
 

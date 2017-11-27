@@ -7,19 +7,19 @@ import (
 	"google.golang.org/grpc/metadata"
 )
 
-func UnaryHeaderInterceptor(header, value string) grpc.UnaryClientInterceptor {
+// UnaryHeaderInterceptor adds key value pairs as headers
+func UnaryHeaderInterceptor(headers map[string]string) grpc.UnaryClientInterceptor {
 	return func(ctx context.Context, method string, req, reply interface{}, cc *grpc.ClientConn, invoker grpc.UnaryInvoker, opts ...grpc.CallOption) error {
-		grpc.SetHeader(ctx, metadata.New(map[string]string{header: value}))
+		grpc.SetHeader(ctx, metadata.New(headers))
 		return nil
 	}
 
 }
 
-/*
-func StreamHeaderInterceptor(header, value string) grpc.StreamClientInterceptor {
+// StreamHeaderInterceptor adds key value pairs as headers
+func StreamHeaderInterceptor(headers map[string]string) grpc.StreamClientInterceptor {
 	return func(ctx context.Context, desc *grpc.StreamDesc, cc *grpc.ClientConn, method string, streamer grpc.Streamer, opts ...grpc.CallOption) (grpc.ClientStream, error) {
-		grpc.SetHeader(ctx, metadata.New(map[string]string{header: value}))
-		return nil
+		grpc.SetHeader(ctx, metadata.New(headers))
+		return streamer(ctx, desc, cc, method, opts...)
 	}
 }
-*/

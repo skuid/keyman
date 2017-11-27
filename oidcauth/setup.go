@@ -14,18 +14,21 @@ import (
 	"golang.org/x/oauth2"
 )
 
+// AuthManager is a convienence struct for caching an oidc Provider and
+// IDTokenVerifier
 type AuthManager struct {
 	Config   *oauth2.Config
 	Provider *oidc.Provider
 	Verifier *oidc.IDTokenVerifier
 }
 
-func NewManager(client_id, client_secret string, ctx context.Context) (*AuthManager, error) {
+// NewManager returns a new AuthManager for the given client id/secret
+func NewManager(ctx context.Context, clientID, clientSecret string) (*AuthManager, error) {
 	manager := &AuthManager{}
 
 	manager.Config = &oauth2.Config{
-		ClientID:     client_id,
-		ClientSecret: client_secret,
+		ClientID:     clientID,
+		ClientSecret: clientSecret,
 		Endpoint: oauth2.Endpoint{
 			AuthURL:  "https://accounts.google.com/o/oauth2/auth",
 			TokenURL: "https://www.googleapis.com/oauth2/v3/token",
@@ -39,11 +42,11 @@ func NewManager(client_id, client_secret string, ctx context.Context) (*AuthMana
 		return nil, fmt.Errorf("Error creating provider: %q", err)
 	}
 	manager.Provider = provider
-	manager.Verifier = provider.Verifier(&oidc.Config{ClientID: client_id})
+	manager.Verifier = provider.Verifier(&oidc.Config{ClientID: clientID})
 	return manager, nil
 }
 
-func openUri(openBrowser bool, url string) {
+func openURI(openBrowser bool, url string) {
 	openInstructions := fmt.Sprintf("Open this url in your browser: %s\n", url)
 
 	if !openBrowser {
@@ -64,6 +67,8 @@ func openUri(openBrowser bool, url string) {
 	}
 }
 
+// EnsureValidTokens ensures a given id, access, and refresh token are valid
+// and refreshed
 func EnsureValidTokens(manager *AuthManager, idToken, accessToken, refreshToken string) (string, string, string, error) {
 	ctx := context.Background()
 	var token *oauth2.Token
@@ -71,7 +76,7 @@ func EnsureValidTokens(manager *AuthManager, idToken, accessToken, refreshToken 
 	if idToken == "" {
 		// Get a token from Google
 		url := manager.Config.AuthCodeURL("state", oauth2.AccessTypeOffline)
-		openUri(true, url)
+		openURI(true, url)
 		fmt.Print("Enter the code Google gave you: \n")
 		reader := bufio.NewReader(os.Stdin)
 		code, err := reader.ReadString('\n')

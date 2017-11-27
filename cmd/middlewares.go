@@ -1,4 +1,4 @@
-package main
+package cmd
 
 import (
 	"time"
@@ -15,6 +15,7 @@ import (
 	"google.golang.org/grpc"
 )
 
+// NewServer returns a new gRPC server
 func NewServer(clientID string, opts ...grpc.ServerOption) *grpc.Server {
 	grpc_zap.ReplaceGrpcLogger(zap.L())
 	zopts := []grpc_zap.Option{
@@ -25,23 +26,23 @@ func NewServer(clientID string, opts ...grpc.ServerOption) *grpc.Server {
 	// Make sure that log statements internal to gRPC library are logged using the zapLogger as well.
 	grpc_zap.ReplaceGrpcLogger(zap.L())
 	// Create a server, make sure we put the grpc_ctxtags context before everything else.
-	server_opts := []grpc.ServerOption{
+	serverOpts := []grpc.ServerOption{
 		grpc_middleware.WithUnaryServerChain(
 			grpc_ctxtags.UnaryServerInterceptor(grpc_ctxtags.WithFieldExtractor(grpc_ctxtags.CodeGenRequestFieldExtractor)),
 			grpc_recovery.UnaryServerInterceptor(),
 			grpc_prometheus.UnaryServerInterceptor,
 			grpc_zap.UnaryServerInterceptor(zap.L(), zopts...),
-			grpc_auth.UnaryServerInterceptor(oidcauth.ValidateIdToken(clientID, "email", "https://accounts.google.com")),
+			grpc_auth.UnaryServerInterceptor(oidcauth.ValidateIDToken(clientID, "https://accounts.google.com")),
 		),
 		grpc_middleware.WithStreamServerChain(
 			grpc_ctxtags.StreamServerInterceptor(grpc_ctxtags.WithFieldExtractor(grpc_ctxtags.CodeGenRequestFieldExtractor)),
 			grpc_prometheus.StreamServerInterceptor,
 			grpc_zap.StreamServerInterceptor(zap.L(), zopts...),
 			grpc_recovery.StreamServerInterceptor(),
-			//grpc_auth.StreamServerInterceptor(oidcauth.ValidateIdToken(clientID, "email", "https://accounts.google.com")),
+			grpc_auth.StreamServerInterceptor(oidcauth.ValidateIDToken(clientID, "https://accounts.google.com")),
 		),
 	}
-	server_opts = append(server_opts, opts...)
-	server := grpc.NewServer(server_opts...)
+	serverOpts = append(serverOpts, opts...)
+	server := grpc.NewServer(serverOpts...)
 	return server
 }
