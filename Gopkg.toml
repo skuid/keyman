@@ -22,8 +22,28 @@
 
 
 [[constraint]]
+  branch = "v2"
+  name = "github.com/coreos/go-oidc"
+
+[[constraint]]
+  name = "github.com/dgrijalva/jwt-go"
+  version = "3.1.0"
+
+[[constraint]]
+  name = "github.com/ghodss/yaml"
+  version = "1.0.0"
+
+[[constraint]]
   branch = "master"
   name = "github.com/golang/protobuf"
+
+[[constraint]]
+  branch = "master"
+  name = "github.com/grpc-ecosystem/go-grpc-middleware"
+
+[[constraint]]
+  name = "github.com/grpc-ecosystem/go-grpc-prometheus"
+  version = "1.1.0"
 
 [[constraint]]
   branch = "master"
@@ -36,6 +56,10 @@
 [[constraint]]
   name = "github.com/skuid/spec"
   version = "1.0.4"
+
+[[constraint]]
+  name = "github.com/spf13/cobra"
+  version = "0.0.1"
 
 [[constraint]]
   name = "github.com/spf13/pflag"
@@ -54,5 +78,9 @@
   name = "golang.org/x/crypto"
 
 [[constraint]]
+  branch = "master"
+  name = "golang.org/x/oauth2"
+
+[[constraint]]
   name = "google.golang.org/grpc"
-  version = "1.7.3"
+  version = "1.8.0"
