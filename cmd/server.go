@@ -3,10 +3,12 @@ package cmd
 import (
 	"flag"
 	"fmt"
+	"io/ioutil"
 	"net/http"
 	"time"
 
 	"github.com/prometheus/client_golang/prometheus/promhttp"
+	"github.com/skuid/keyman/groupauth"
 	"github.com/skuid/keyman/oidcauth"
 	"github.com/skuid/keyman/server"
 	"github.com/skuid/keyman/sign"
@@ -40,11 +42,11 @@ var serverCmd = &cobra.Command{
 
 func serverFunc(cmd *cobra.Command, args []string) {
 
+	// Certificate Authority initialization
 	ca, err := sign.ReadPrivKey(viper.GetString("key"))
 	if err != nil {
 		zap.L().Fatal("Error reading key", zap.Error(err))
 	}
-
 	authority := &server.Authority{
 		CA:             ca,
 		CaComment:      viper.GetString("ca-name"),
@@ -70,11 +72,29 @@ func serverFunc(cmd *cobra.Command, args []string) {
 		zap.L().Info("Metrics server gracefully stopped")
 	}()
 
+	// Group authorization initialization
+	saData, err := ioutil.ReadFile(viper.GetString("service-account"))
+	if err != nil {
+		zap.L().Fatal("Error reading group credential file", zap.Error(err))
+	}
+	ud, err := groupauth.NewUserDirectory(
+		saData,
+		viper.GetString("admin-username"),
+		viper.GetString("domain"),
+		viper.GetStringSlice("groups"),
+		viper.GetString("redis-host"),
+		viper.GetDuration("validity"),
+	)
+	if err != nil {
+		zap.L().Fatal("Error creating directory", zap.Error(err))
+	}
+
 	authMux := http.NewServeMux()
 	authMux.HandleFunc("/api/v1/sign", authority.SignHTTP)
 	handler := middlewares.Apply(
 		authMux,
-		oidcauth.OidcUserContext(
+		ud.Authorize(oidcauth.FromContext),
+		oidcauth.OidcEmailContext(
 			"https://accounts.google.com",
 			viper.GetString("client_id"),
 		),
@@ -86,7 +106,7 @@ func serverFunc(cmd *cobra.Command, args []string) {
 	handler = middlewares.Apply(
 		mux,
 		middlewares.InstrumentRoute(),
-		middlewares.Logging(oidcauth.UserLoggingClosure),
+		middlewares.Logging(oidcauth.EmailLoggingClosure),
 	)
 
 	httpServer := &http.Server{Addr: hostPort, Handler: handler}
@@ -116,7 +136,12 @@ func init() {
 	localFlagSet.Int("metrics-port", 3001, "The metrics port to listen on")
 	localFlagSet.Duration("validity", time.Duration(8)*time.Hour, "The amount of time certs are signed for")
 	localFlagSet.String("ca-name", "ca", "The CA name")
-	localFlagSet.Bool("tls", true, "Use TLS")
+
+	localFlagSet.String("service-account", "", "The Google service account file")
+	localFlagSet.String("admin-username", "", "The Google admin username")
+	localFlagSet.String("domain", "", "The Google domain")
+	localFlagSet.StringSlice("groups", []string{}, "The Google groups to authorize")
+	localFlagSet.String("redis-host", "", "The redis hostname to connect to")
 
 	viper.BindPFlags(localFlagSet)
 }

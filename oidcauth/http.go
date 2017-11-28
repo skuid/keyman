@@ -11,8 +11,7 @@ import (
 	"go.uber.org/zap/zapcore"
 )
 
-// User is an OIDC authenticated user
-type User struct {
+type user struct {
 	Email string `json:"email"`
 }
 
@@ -20,33 +19,33 @@ type User struct {
 // This prevents collisions with keys defined in other packages.
 type key int
 
-// userKey is the key for user.User values in Contexts. It is
-// unexported; clients use user.NewContext and user.FromContext
+// emailKey is the key for an email in Contexts. It is
+// unexported; clients use oidcauth.NewContext and oidcauth.FromContext
 // instead of using this key directly.
-var userKey key
+var emailKey key
 
-// NewContext returns a new Context that carries value u.
-func NewContext(ctx context.Context, u *User) context.Context {
-	return context.WithValue(ctx, userKey, u)
+// NewContext returns a new Context that carries value email.
+func NewContext(ctx context.Context, email string) context.Context {
+	return context.WithValue(ctx, emailKey, email)
 }
 
-// FromContext returns the User value stored in ctx, if any.
-func FromContext(ctx context.Context) (*User, bool) {
-	u, ok := ctx.Value(userKey).(*User)
-	return u, ok
+// FromContext returns the Email value stored in ctx, if any.
+func FromContext(ctx context.Context) (string, bool) {
+	email, ok := ctx.Value(emailKey).(string)
+	return email, ok
 }
 
-// UserLoggingClosure adds a "user" field for an authorized user
-func UserLoggingClosure(r *http.Request) []zapcore.Field {
-	user, ok := FromContext(r.Context())
+// EmailLoggingClosure adds a "user" field for an authorized user
+func EmailLoggingClosure(r *http.Request) []zapcore.Field {
+	email, ok := FromContext(r.Context())
 	if !ok {
 		return []zapcore.Field{}
 	}
-	return []zapcore.Field{zap.String("user", user.Email)}
+	return []zapcore.Field{zap.String("user", email)}
 }
 
-// OidcUserContext is a middlware for embedding a User in the request's context
-func OidcUserContext(issuerURL, clientID string) middlewares.Middleware {
+// OidcEmailContext is a middlware for embedding a Email in the request's context
+func OidcEmailContext(issuerURL, clientID string) middlewares.Middleware {
 	provider, err := oidc.NewProvider(context.Background(), issuerURL)
 	if err != nil {
 		zap.L().Error("Error creating provider", zap.Error(err))
@@ -85,13 +84,13 @@ func OidcUserContext(issuerURL, clientID string) middlewares.Middleware {
 				http.Error(w, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
 				return
 			}
-			user := &User{}
-			if err := idToken.Claims(&user); err != nil {
+			u := &user{}
+			if err := idToken.Claims(&u); err != nil {
 				zap.L().Error("Couldn't get claim off of token", zap.Error(err))
 				http.Error(w, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
 				return
 			}
-			*r = *r.WithContext(NewContext(r.Context(), user))
+			*r = *r.WithContext(NewContext(r.Context(), u.Email))
 			h.ServeHTTP(w, r)
 		})
 	}
