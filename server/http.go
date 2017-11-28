@@ -12,16 +12,16 @@ import (
 )
 
 // SignHTTP is a handler for incoming certificate requests. Requests must contain
-// an oidcauth.User struct in the context
+// an context that has an oidcauth email in the context
 func (a *Authority) SignHTTP(w http.ResponseWriter, r *http.Request) {
 	var (
 		input    = &shapes.SignRequest{}
 		response = &shapes.KeyResponse{}
 	)
 
-	user, ok := oidcauth.FromContext(r.Context())
+	email, ok := oidcauth.FromContext(r.Context())
 	if !ok {
-		zap.L().Error("Couldn't get user from context: please wrap with oidcauth.OidcUserContext()")
+		zap.L().Error("Couldn't get email from context: please wrap with oidcauth.OidcEmailContext()")
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return
 	}
@@ -34,7 +34,7 @@ func (a *Authority) SignHTTP(w http.ResponseWriter, r *http.Request) {
 
 	signedCert, err := a.CA.Sign(
 		input.Key,
-		user.Email,
+		email,
 		input.Principals,
 		a.Duration,
 	)

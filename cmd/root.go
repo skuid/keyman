@@ -58,7 +58,7 @@ func clientRequest(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		return fmt.Errorf("Error encoding request: %q", err)
 	}
-	url := fmt.Sprintf("https://%s/api/v1/sign", viper.GetString("server"))
+	url := fmt.Sprintf("%s/api/v1/sign", viper.GetString("server"))
 	req, err := http.NewRequest(http.MethodPost, url, buf)
 	if err != nil {
 		return fmt.Errorf("Error preparing request: %s", err)
@@ -75,6 +75,15 @@ func clientRequest(cmd *cobra.Command, args []string) error {
 	resp, err := client.Do(req)
 	if err != nil {
 		return fmt.Errorf("Error requesting cert: %s", err)
+	}
+
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		buf := &bytes.Buffer{}
+		buf.ReadFrom(resp.Body)
+		fmt.Printf("Error: %s - %s\n", resp.Status, string(buf.Bytes()))
+		return fmt.Errorf("Error: %q", resp.Status)
 	}
 
 	response := &pb.KeyResponse{}
@@ -103,7 +112,7 @@ func init() {
 	localFlagSet.Bool("skip-verify", false, "Skip server TLS verification")
 	localFlagSet.Bool("open-browser", true, "Open the oauth approval URL in the browser")
 	localFlagSet.String("client-secret", "", "The client secret for the application")
-	localFlagSet.String("server", "localhost:3000", "The server to connect to")
+	localFlagSet.String("server", "https://localhost:3000", "The server to connect to")
 	localFlagSet.StringSlice("principals", []string{"core", "openvpnas"}, "The identities to request")
 	localFlagSet.String("pubkey", "", "The key to sign")
 

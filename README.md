@@ -46,8 +46,8 @@ cd demo
 openssl req -x509 -nodes -newkey rsa:4096 -keyout server.key -out server.pem -subj "/C=US/ST=Tennessee/L=Chattanooga/O=Skuid/OU=/CN=localhost"
 cd -
 
-# Start the server and an SSH server
-echo "      KEYMAN_CLIENT_ID: \"${KEYMAN_CLIENT_ID}\"" >> docker-compose.yaml
+# Start the server and an SSH server after
+# filling out the empty variables in docker-compose.yaml
 docker-compose up -d
 
 # Get your pubkey signed by the server

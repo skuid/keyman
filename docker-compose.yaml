@@ -1,5 +1,9 @@
 version: "3"
 services:
+  redis:
+    image: redis:latest
+    ports:
+    - '6379'
   ssh:
     build:
       context: ./demo
@@ -17,3 +21,9 @@ services:
       KEYMAN_CERT_FILE: "/demo/server.pem"
       KEYMAN_KEY_FILE: "/demo/server.key"
       KEYMAN_KEY: "/demo/ca"
+      KEYMAN_REDIS_HOST: redis
+      KEYMAN_GROUPS: ""
+      KEYMAN_DOMAIN: ""
+      KEYMAN_ADMIN_USERNAME: ""
+      KEYMAN_SERVICE_ACCOUNT: "/demo/sa.json"
+      KEYMAN_CLIENT_ID: ""
