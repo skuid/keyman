@@ -2,6 +2,12 @@
 
 
 [[projects]]
+  name = "cloud.google.com/go"
+  packages = ["compute/metadata"]
+  revision = "2d3a6656c17a60b0815b7e06ab0be04eacb6e613"
+  version = "v0.16.0"
+
+[[projects]]
   branch = "master"
   name = "github.com/beorn7/perks"
   packages = ["quantile"]
@@ -30,6 +36,12 @@
   packages = ["."]
   revision = "0ca9ea5df5451ffdf184b4428c902747c2c11cd7"
   version = "v1.0.0"
+
+[[projects]]
+  name = "github.com/go-redis/redis"
+  packages = [".","internal","internal/consistenthash","internal/hashtag","internal/pool","internal/proto"]
+  revision = "e5e021257bfc6d5fbf0beac33e30194311fb189f"
+  version = "v6.7.4"
 
 [[projects]]
   branch = "master"
@@ -196,7 +208,7 @@
 [[projects]]
   branch = "master"
   name = "golang.org/x/oauth2"
-  packages = [".","internal"]
+  packages = [".","google","internal","jws","jwt"]
   revision = "f95fa95eaa936d9d87489b15d1d18b97c1ba9c28"
 
 [[projects]]
@@ -212,8 +224,14 @@
   revision = "88f656faf3f37f690df1a32515b479415e1a6769"
 
 [[projects]]
+  branch = "master"
+  name = "google.golang.org/api"
+  packages = ["admin/directory/v1","gensupport","googleapi","googleapi/internal/uritemplates"]
+  revision = "b804618854e387dc7fdd9e50496183ddcbb4b120"
+
+[[projects]]
   name = "google.golang.org/appengine"
-  packages = ["internal","internal/base","internal/datastore","internal/log","internal/remote_api","internal/urlfetch","urlfetch"]
+  packages = [".","internal","internal/app_identity","internal/base","internal/datastore","internal/log","internal/modules","internal/remote_api","internal/urlfetch","urlfetch"]
   revision = "150dc57a1b433e64154302bdc40b6bb8aefa313a"
   version = "v1.0.0"
 
@@ -244,6 +262,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "f4dfad55c631b7ffbf92c6611950c15f397f2ef06940045a6d606a2c0a89cc3b"
+  inputs-digest = "870d663c6c88e14d5e287630a5b9f9535dac9b5ef847b574f52d71467ace3006"
   solver-name = "gps-cdcl"
   solver-version = 1
