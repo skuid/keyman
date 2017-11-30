@@ -77,7 +77,7 @@ func EnsureValidTokens(manager *AuthManager, idToken, accessToken, refreshToken 
 		// Get a token from Google
 		url := manager.Config.AuthCodeURL("state", oauth2.AccessTypeOffline)
 		openURI(true, url)
-		fmt.Print("Enter the code Google gave you: \n")
+		os.Stderr.WriteString("Enter the code that Google gave you: \n")
 		reader := bufio.NewReader(os.Stdin)
 		code, err := reader.ReadString('\n')
 		if err != nil {

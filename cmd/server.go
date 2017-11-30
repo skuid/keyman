@@ -96,7 +96,7 @@ func serverFunc(cmd *cobra.Command, args []string) {
 		ud.Authorize(oidcauth.FromContext),
 		oidcauth.OidcEmailContext(
 			"https://accounts.google.com",
-			viper.GetString("client_id"),
+			viper.GetString("client-id"),
 		),
 	)
 

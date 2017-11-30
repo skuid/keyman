@@ -14,11 +14,11 @@ import (
 // Setup ensures the user has a valid id token for OIDC requests
 func Setup() error {
 	var (
-		idToken      = viper.GetString("id_token")
-		accessToken  = viper.GetString("access_token")
-		refreshToken = viper.GetString("refresh_token")
-		clientID     = viper.GetString("client_id")
-		clientSecret = viper.GetString("client_secret")
+		idToken      = viper.GetString("id-token")
+		accessToken  = viper.GetString("access-token")
+		refreshToken = viper.GetString("refresh-token")
+		clientID     = viper.GetString("client-id")
+		clientSecret = viper.GetString("client-secret")
 		err          error
 	)
 
@@ -35,9 +35,9 @@ func Setup() error {
 	if err != nil {
 		return err
 	}
-	viper.Set("id_token", idToken)
-	viper.Set("access_token", accessToken)
-	viper.Set("refresh_token", refreshToken)
+	viper.Set("id-token", idToken)
+	viper.Set("access-token", accessToken)
+	viper.Set("refresh-token", refreshToken)
 
 	// Write config
 	{

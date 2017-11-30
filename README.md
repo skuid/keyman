@@ -1,10 +1,12 @@
 [![Build Status](https://travis-ci.org/skuid/keyman.svg?branch=master)](https://travis-ci.org/skuid/keyman)
-[![https://img.shields.io/badge/godoc-reference-5272B4.svg?style=flat-square](https://img.shields.io/badge/godoc-reference-5272B4.svg?style=flat-square)](http://godoc.org/github.com/skuid/keyman/)
+[![Godoc](https://img.shields.io/badge/godoc-reference-5272B4.svg?style=flat-square)](http://godoc.org/github.com/skuid/keyman/)
 [![Docker Repository on Quay](https://quay.io/repository/skuid/keyman/status "Docker Repository on Quay")](https://quay.io/repository/skuid/keyman)
 
 # keyman
 
-An SSH key CA Server
+An SSH key CA Server.
+
+With keyman, users can SSH into servers as whichever user is specified in the `principals`.
 
 [![keyman](/keyman.jpg)]()
 
@@ -28,9 +30,10 @@ Flags:
   -h, --help                     help for keyman
       --open-browser             Open the oauth approval URL in the browser (default true)
       --principals stringSlice   The identities to request (default [core,openvpnas])
-      --pubkey string            The key to sign
-      --server string            The server to connect to (default "localhost:3000")
+      --pubkey string            The key to sign. Defaults to ~/.ssh/id_rsa.pub
+      --server string            The server to connect to (default "https://localhost:3000")
       --skip-verify              Skip server TLS verification
+      --write                    Write the issued SSH cert to the ~/.ssh directory (default true)
 
 Use "keyman [command] --help" for more information about a command.
 ```
@@ -52,8 +55,9 @@ docker-compose up -d
 
 # Get your pubkey signed by the server
 go build
+KEYMAN_SERVER="http://localhost:3000"
 MY_PUBKEY=$(ls ~/.ssh/id_rsa.pub)
-./keyman --pubkey $MY_PUBKEY > ~/.ssh/id_rsa-cert.pub
+./keyman --skip-verify  --pubkey $MY_PUBKEY > ~/.ssh/id_rsa-cert.pub
 ssh-keygen -Lf ~/.ssh/id_rsa-cert.pub
 ssh -p 2222 core@localhost
 
@@ -69,8 +73,27 @@ Create it and keep the private key secret.
 ```bash
 # Create an SSH Certificate Authority
 ssh-keygen -C CA -f ca
+```
 
-keyman -k ./ca
+First, you'll need to create a project and OAuth 2.0 Credential in the Google
+Cloud Console. You can follow [this guide](https://developers.google.com/identity/sign-in/web/devconsole-project)
+on creating an application, but do *NOT* create a web application. You'll need
+to select "Other" as the Application Type. Once that is created, you can
+download the ClientID and ClientSecret as a JSON file for ease of use.
+
+You'll need to provide the Keyman server the ClientID, and each user the
+ClientSecret and ClientID.
+
+Second, you'll need to create a Google [Service
+Account](https://console.cloud.google.com/projectselector/iam-admin/serviceaccounts)
+and download the credentials as JSON. This allows the Keyman server to only
+allow certain group members access.
+
+This Service account requires the following scopes:
+
+```
+https://www.googleapis.com/auth/admin.directory.group.member.readonly
+https://www.googleapis.com/auth/admin.directory.group.readonly
 ```
 
 # Reading
@@ -79,7 +102,6 @@ keyman -k ./ca
 
 # TODO
 
-- AuthN/AuthZ
 - Key Revocation
 
 # License

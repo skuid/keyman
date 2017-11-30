@@ -23,15 +23,16 @@ var cfgFile string
 var RootCmd = &cobra.Command{
 	Use:   "keyman",
 	Short: "keyman is a cli for requesting server-signed SSH certs",
-	RunE:  clientRequest,
+	Run:   clientRequest,
 }
 
-func clientRequest(cmd *cobra.Command, args []string) error {
+func clientRequest(cmd *cobra.Command, args []string) {
 
 	// Setup the OIDC configuration
 	err := oidcauth.Setup()
 	if err != nil {
-		return err
+		fmt.Printf("Error setting up OIDC: %q\n", err)
+		os.Exit(1)
 	}
 
 	// Get the user's ssh key
@@ -39,13 +40,16 @@ func clientRequest(cmd *cobra.Command, args []string) error {
 	if keyPath == "" {
 		home, err := homedir.Dir()
 		if err != nil {
-			return fmt.Errorf("Error getting home: %q", err)
+			fmt.Printf("Error getting home: %q\n", err)
+			os.Exit(1)
 		}
 		keyPath = filepath.Join(home, ".ssh/id_rsa.pub")
 	}
+
 	keyContent, err := ioutil.ReadFile(keyPath)
 	if err != nil {
-		return fmt.Errorf("Error reading in key file: %q", err)
+		fmt.Printf("Error reading in key file: %q\n", err)
+		os.Exit(1)
 	}
 
 	// Create the request
@@ -56,15 +60,17 @@ func clientRequest(cmd *cobra.Command, args []string) error {
 	buf := &bytes.Buffer{}
 	err = json.NewEncoder(buf).Encode(request)
 	if err != nil {
-		return fmt.Errorf("Error encoding request: %q", err)
+		fmt.Printf("Error encoding request: %q\n", err)
+		os.Exit(1)
 	}
 	url := fmt.Sprintf("%s/api/v1/sign", viper.GetString("server"))
 	req, err := http.NewRequest(http.MethodPost, url, buf)
 	if err != nil {
-		return fmt.Errorf("Error preparing request: %s", err)
+		fmt.Printf("Error preparing request: %s\n", err)
+		os.Exit(1)
 	}
 	req.Header.Set("content-type", "application/json")
-	req.Header.Set("Authorization", fmt.Sprintf("bearer %s", viper.GetString("id_token")))
+	req.Header.Set("Authorization", fmt.Sprintf("bearer %s", viper.GetString("id-token")))
 	req.Header.Set("user-agent", "keyman-cli")
 
 	tr := &http.Transport{
@@ -74,7 +80,8 @@ func clientRequest(cmd *cobra.Command, args []string) error {
 
 	resp, err := client.Do(req)
 	if err != nil {
-		return fmt.Errorf("Error requesting cert: %s", err)
+		fmt.Printf("Error requesting cert: %s\n", err)
+		os.Exit(1)
 	}
 
 	defer resp.Body.Close()
@@ -83,17 +90,30 @@ func clientRequest(cmd *cobra.Command, args []string) error {
 		buf := &bytes.Buffer{}
 		buf.ReadFrom(resp.Body)
 		fmt.Printf("Error: %s - %s\n", resp.Status, string(buf.Bytes()))
-		return fmt.Errorf("Error: %q", resp.Status)
+		os.Exit(1)
 	}
 
 	response := &pb.KeyResponse{}
 	err = json.NewDecoder(resp.Body).Decode(response)
 	if err != nil {
-		return fmt.Errorf("Error decoding response: %s", err)
+		fmt.Printf("Error decoding response: %s\n", err)
+		os.Exit(1)
 	}
 
+	if viper.GetBool("write") {
+		outfile := filepath.Join(
+			filepath.Dir(keyPath),
+			certFileName(keyPath),
+		)
+		err = ioutil.WriteFile(outfile, response.Certificate, 0644)
+		if err != nil {
+			fmt.Printf("Error writing ssh cert: %s\n", err)
+			os.Exit(1)
+		}
+		fmt.Printf("Wrote SSH Cert to %s\n", outfile)
+		return
+	}
 	fmt.Println(string(response.Certificate))
-	return nil
 }
 
 // Execute adds all child commands to the root command sets flags appropriately.
@@ -114,7 +134,8 @@ func init() {
 	localFlagSet.String("client-secret", "", "The client secret for the application")
 	localFlagSet.String("server", "https://localhost:3000", "The server to connect to")
 	localFlagSet.StringSlice("principals", []string{"core", "openvpnas"}, "The identities to request")
-	localFlagSet.String("pubkey", "", "The key to sign")
+	localFlagSet.String("pubkey", "", "The key to sign. Defaults to ~/.ssh/id_rsa.pub")
+	localFlagSet.Bool("write", true, "Write the issued SSH cert to the ~/.ssh directory")
 
 	// Here you will define your flags and configuration settings.
 	// Cobra supports Persistent Flags, which, if defined here,

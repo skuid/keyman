@@ -18,12 +18,10 @@ services:
     volumes:
     - './demo/:/demo/'
     environment:
-      KEYMAN_CERT_FILE: "/demo/server.pem"
-      KEYMAN_KEY_FILE: "/demo/server.key"
       KEYMAN_KEY: "/demo/ca"
       KEYMAN_REDIS_HOST: redis
       KEYMAN_GROUPS: ""
       KEYMAN_DOMAIN: ""
       KEYMAN_ADMIN_USERNAME: ""
-      KEYMAN_SERVICE_ACCOUNT: "/demo/sa.json"
+      KEYMAN_SERVICE_ACCOUNT: "/demo/sa.json" # Create this SA token
       KEYMAN_CLIENT_ID: ""
