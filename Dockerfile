@@ -6,6 +6,8 @@ WORKDIR $PKG
 
 ARG COMMIT_SHA
 
+ENV CGO_ENABLED 0
+
 RUN go install -ldflags "-w -X github.com/skuid/keyman/vendor/github.com/skuid/spec/metrics.commit=${COMMIT_SHA}"
 
 FROM alpine:3.6
